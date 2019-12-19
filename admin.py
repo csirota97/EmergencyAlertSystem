@@ -1,4 +1,5 @@
 import socket, os, config, atexit,threading,time
+from sys import platform
 from pynput.keyboard import Key, Controller
 
 
@@ -8,21 +9,33 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((SERVER_IP,config.SA_PORT))
 
 killed = False
+new_message = None
+
+def input_loop():
+    global killed, new_message
+
+    while not killed:
+        new_message = input()
 
 def send_input():
-    global killed
+    global killed, new_message
 
     keyboard = Controller()
+
+    threading.Thread(target=input_loop).start()
+
     while True:
         if killed == True:
             s.send(bytes("EXIT",'utf-8'))
             exit()
-        message = input()
-        s.send(bytes(message,'utf-8'))
-        if message == "CUSTOM":
-            s.send(bytes(input("Headline:\n"),'utf-8'))
-            time.sleep(.1)
-            s.send(bytes(input("Description:\n"),'utf-8'))
+        if new_message != None:
+            s.send(bytes(new_message,'utf-8'))
+            if new_message == "CUSTOM":
+                s.send(bytes(input("Headline:\n"),'utf-8'))
+                time.sleep(.1)
+                s.send(bytes(input("Description:\n"),'utf-8'))
+            new_message = None
+
 
 
 send_input_thread = threading.Thread(target=send_input)
@@ -34,6 +47,7 @@ def exiting():
     killed = True
     keyboard = Controller()
     keyboard.press(Key.enter)
+    time.sleep(0.1)
     keyboard.release(Key.enter)
 
 atexit.register(exiting)
@@ -44,12 +58,21 @@ try:
         print(msg)
     if msg == "EXIT":
         killed = True
+        print("BALLSSSS")
         keyboard = Controller()
         keyboard.press(Key.enter)
         keyboard.release(Key.enter)
         exit()
     if msg == 'FIRE':
-        os.system('open ALERT.html')
+        if platform == "linux" or platform == "linux2":
+            # linux
+            os.system("xdg-open \"\" ALERT.html")
+        elif platform == "darwin":
+            os.system('open ALERT.html')
+            # OS X
+        elif platform == "win32":
+            # Windows...
+            os.system("start \"\" ALERT.html    ")
 
     print("\nTo test system, enter: TEST\
            \nTo send alert, enter: FIRE\
@@ -61,9 +84,26 @@ try:
         if msg in config.ALERTS:
             print(msg)
         if msg == 'FIRE':
-            os.system('open ALERT.html')
+            if platform == "linux" or platform == "linux2":
+                # linux
+                os.system("xdg-open \"\" ALERT.html")
+            elif platform == "darwin":
+                os.system('open ALERT.html')
+                # OS X
+            elif platform == "win32":
+                # Windows...
+                os.system("start \"\" ALERT.html    ")
+
         if msg == 'TEST':
-            os.system('open TEST.html')
+            if platform == "linux" or platform == "linux2":
+                # linux
+                os.system("xdg-open \"\" TEST.html")
+            elif platform == "darwin":
+                os.system('open TEST.html')
+                # OS X
+            elif platform == "win32":
+                # Windows...
+                os.system("start \"\" TEST.html    ")
         if msg[0:6] == 'CUSTOM':
             components = msg.split(']#[')
             name = components[1]
@@ -84,12 +124,21 @@ try:
                 \t</body>\
                 </html>")
             f.close()
-            os.system('open CUSTOM.html')
+            if platform == "linux" or platform == "linux2":
+                # linux
+                os.system("xdg-open \"\" CUSTOM.html")
+            elif platform == "darwin":
+                os.system('open CUSTOM.html')
+                # OS X
+            elif platform == "win32":
+                # Windows...
+                os.system("start \"\" CUSTOM.html    ")
 
         if msg == "EXIT":
             killed = True
             keyboard = Controller()
             keyboard.press(Key.enter)
+            time.sleep(0.1)
             keyboard.release(Key.enter)
             exit()
 except KeyboardInterrupt:
