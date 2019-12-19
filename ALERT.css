@@ -1,0 +1,23 @@
+.alert {
+    background-color: #FF0000;
+    color: #FFFF00;
+    text-align: center;
+    font-size: 400%;
+    border: solid;
+    border-width: 5px;
+    border-color: #000000;
+    padding: 1%;
+}
+
+.alert_message {
+    background-color: #DDDDDD;
+    text-align: center;
+    font-size: 100%;
+    border: solid;
+    border-width: 5px;
+    border-color: #000000;
+    margin-top: 1%;
+    margin-left: 10%;
+    margin-right: 10%;
+    padding: 1%;
+}
