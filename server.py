@@ -120,9 +120,21 @@ accept_admins = threading.Thread(target=admin_accepting)
 accept_admins.start()
 def ALERT(admin, alert):
     print("\033[1;34;40mALERT THREAD RUNNING")
+    if alert == "CUSTOM":
+        admin[0].send(bytes("recv","utf-8"))
+        name = admin[0].recv(1024).decode('utf-8')
+        admin[0].send(bytes("recv","utf-8"))
+        desc = admin[0].recv(1024).decode('utf-8')
+        admin[0].send(bytes("recv","utf-8"))
+        print(name)
+        print(desc)
     for client in client_ips:
         try:
-            client[0].send(bytes(alert,"utf-8"))
+            if alert == "CUSTOM":
+                delim = ']#['
+                client[0].send(bytes(alert+delim+name+delim+desc,"utf-8"))
+            else:
+                client[0].send(bytes(alert,"utf-8"))
         except BrokenPipeLineError:
             print(f"Could not send")
     print("DONE")
