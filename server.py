@@ -1,4 +1,4 @@
-import socket, threading, time, config, atexit
+import socket, threading, time, config, atexit, os
 
 client_ips=[]
 admin_ips=[]
@@ -19,6 +19,38 @@ admin_in_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 admin_in_socket.bind((host,admin_port))
 admin_in_socket.listen(10)
 
+def kill_server():
+    global client_ips, admin_ips
+    for c in client_ips:
+        try:
+            c[0].send(bytes("EXIT",'utf-8'))
+        except:
+            pass
+        try:
+            c[0].shutdown(socket.SHUT_RDWR)
+            c[0].close()
+        except:
+            pass
+    for c in admin_ips:
+        try:
+            c[0].send(bytes("EXIT",'utf-8'))
+        except:
+            pass
+        try:
+            c[0].shutdown(socket.SHUT_RDWR)
+            c[0].close()
+        except:
+            pass
+
+    admin_ips = []
+    client_ips = []
+    print("\033[1;31;40mAll Clients Disconnected")
+    print (client_ips)
+    print("\033[1;31;40mAll Admins Disconnected")
+    print (admin_ips)
+    print("SHUTTING DOWN")
+
+atexit.register(kill_server)
 
 
 print("\033[1;34;40m----------------\n Server Started\n----------------")
